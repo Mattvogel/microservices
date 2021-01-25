@@ -12,7 +12,7 @@ func main() {
 
 	fmt.Println("Hello World")
 
-	router := sw.NetRouter()
+	router := sw.NewRouter()
 
 	log.Fatal(router.Run(":8080"))
 }

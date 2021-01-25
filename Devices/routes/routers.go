@@ -13,7 +13,7 @@ package routes
 import (
 	"net/http"
 
-	"Auth/controllers"
+	"Devices/controllers"
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/twinj/uuid"
@@ -35,7 +35,7 @@ type Route struct {
 type Routes []Route
 
 var auth = new(controllers.AuthController)
-var user = new(controllers.UserController)
+var devices = new(controllers.DeviceController)
 
 //TokenAuthMiddleware ...
 func TokenAuthMiddleware() gin.HandlerFunc {
@@ -77,16 +77,16 @@ func NewRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(CORS())
 	router.Use(RequestIDMiddleware())
-	for _, route := range insecureroutes {
+	for _, route := range routes {
 		switch route.Method {
 		case http.MethodGet:
-			router.GET(route.Pattern, route.HandlerFunc)
+			router.GET(route.Pattern, TokenAuthMiddleware(), route.HandlerFunc)
 		case http.MethodPost:
-			router.POST(route.Pattern, route.HandlerFunc)
+			router.POST(route.Pattern, TokenAuthMiddleware(), route.HandlerFunc)
 		case http.MethodPut:
-			router.PUT(route.Pattern, route.HandlerFunc)
+			router.PUT(route.Pattern, TokenAuthMiddleware(), route.HandlerFunc)
 		case http.MethodDelete:
-			router.DELETE(route.Pattern, route.HandlerFunc)
+			router.DELETE(route.Pattern, TokenAuthMiddleware(), route.HandlerFunc)
 		}
 	}
 
@@ -98,39 +98,29 @@ func Index(c *gin.Context) {
 	c.String(http.StatusOK, "Hello World!")
 }
 
-var insecureroutes = Routes{
+var routes = Routes{
 	{
-		"Index",
+		"AddDevice",
+		http.MethodPost,
+		"/v1/device",
+		devices.AddDevice,
+	},
+	{
+		"GetDeviceByID",
 		http.MethodGet,
-		"/v1",
-		Index,
+		"/v1/device/:deviceID",
+		devices.GetDeviceByID,
 	},
-
 	{
-		"CreateUser",
-		http.MethodPost,
-		"/v1/user",
-		user.Register,
-	},
-
-	{
-		"LoginUser",
-		http.MethodPost,
-		"/v1/user/login",
-		user.Login,
-	},
-
-	{
-		"LogoutUser",
+		"GetDeviceByOwner",
 		http.MethodGet,
-		"/v1/user/logout",
-		user.Logout,
+		"/v1/device",
+		devices.GetDeviceByOwner,
 	},
-
 	{
-		"TokenRefresh",
-		http.MethodPost,
-		"/v1/user/refresh",
-		auth.Refresh,
+		"UpdateDevice",
+		http.MethodPut,
+		"/v1/device/:deviceId",
+		devices.UpdateDevice,
 	},
 }
