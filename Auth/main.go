@@ -3,11 +3,16 @@ package main
 import (
 	"Auth/db"
 	sw "Auth/routes"
+	"fmt"
 	"log"
+	"os"
 )
 
 func main() {
 
+	fmt.Println(os.Getenv("DB_HOST"))
+	fmt.Println(os.Getenv("DB_PORT"))
+	fmt.Println(os.Getenv("DB_NAME"))
 	db.Init()
 
 	db.InitRedis("1")

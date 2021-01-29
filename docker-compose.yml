@@ -1,0 +1,99 @@
+version: '3.2'
+
+services:
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
+    redis:
+        image: "redis:alpine"
+        restart: always
+        command: redis-server --requirepass example
+
+        ports:
+         - "6379:6379"
+
+        volumes:
+         - $PWD/redis-data:/var/lib/redis
+         - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+
+        environment:
+         - REDIS_REPLICATION_MODE=master
+
+    timescale:
+        image: "timescale/timescaledb:latest-pg12"
+        restart: always
+        ports:
+            - 5432:5432
+        volumes:
+            - $PWD/Database/:/docker-entrypoint-initdb.d/
+        environment:
+            TIMESCALEDB_TELEMETRY: "off"
+            POSTGRES_PASSWORD: "example"
+    
+    auth:
+        image: auth:0.0.2
+        restart: always
+        ports:
+            - 8000:8000
+        environment:
+            ENV: LOCAL
+            PORT: 8000
+            SSL: "TRUE"
+            DB_USER: "postgres"
+            DB_PASS: example
+            DB_HOST: "db"
+            DB_PORT: "5432"
+            DB_NAME: "scales"
+            ACCESS_SECRET: "StrongSecret"
+            REFRESH_SECRET: "RefreshSecret"
+            REDIS_SECRET: "RedisSecret"
+            REDIS_HOST: "redis:6379"
+            REDIS_PASSWORD: "example"
+        links:
+            - "timescale:db"
+
+    devices:
+        image: devices:0.0.1
+        restart: always
+        ports:
+            - 8001:8000
+        environment:
+            ENV: LOCAL
+            PORT: 8000
+            SSL: "TRUE"
+            DB_USER: "postgres"
+            DB_PASS: example
+            DB_HOST: "db"
+            DB_PORT: "5432"
+            DB_NAME: "scales"
+            ACCESS_SECRET: "StrongSecret"
+            REFRESH_SECRET: "RefreshSecret"
+            REDIS_SECRET: "RedisSecret"
+            REDIS_HOST: "redis:6379"
+            REDIS_PASSWORD: "example"
+        links:
+            - "timescale:db"
+        
+    conditions:
+        image: conditions:0.0.1
+        restart: always
+        ports:
+            - 8002:8000
+        environment:
+            ENV: LOCAL
+            PORT: 8000
+            SSL: "TRUE"
+            DB_USER: "postgres"
+            DB_PASS: example
+            DB_HOST: "db"
+            DB_PORT: "5432"
+            DB_NAME: "scales"
+            ACCESS_SECRET: "StrongSecret"
+            REFRESH_SECRET: "RefreshSecret"
+            REDIS_SECRET: "RedisSecret"
+            REDIS_HOST: "redis:6379"
+            REDIS_PASSWORD: "example"
+        links:
+            - "timescale:db"
