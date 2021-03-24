@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: conditions
+  name: conditions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conditions
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: conditions
+    spec:
+      containers:
+        - env:
+            - name: ACCESS_SECRET
+              value: StrongSecret
+            - name: DB_HOST
+              value: db
+            - name: DB_NAME
+              value: scales
+            - name: DB_PASS
+              value: example
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: postgres
+            - name: ENV
+              value: LOCAL
+            - name: PORT
+              value: "8000"
+            - name: REDIS_HOST
+              value: redis:6379
+            - name: REDIS_PASSWORD
+              value: example
+            - name: REDIS_SECRET
+              value: RedisSecret
+            - name: REFRESH_SECRET
+              value: RefreshSecret
+            - name: SSL
+              value: "TRUE"
+          image: conditions:0.0.1
+          name: conditions
+          ports:
+            - containerPort: 8000
+          resources: {}
+      restartPolicy: Always
+status: {}
